@@ -78,13 +78,14 @@
 
 
 
-        <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search On Website" aria-label="Search">
-          <button id="search-btn" class="btn btn-outline-success" href="#NavBar" type="submit">Search</button>
-        </form>
+      <form class="d-flex" role="search">
+        <input id="searchInput" class="form-control me-2" type="search" placeholder="Search On Website" aria-label="Search">
+        <button id="search-btn" class="btn btn-outline-success" type="button">Search</button>
+      </form>
       </div>
     </div>
   </nav>
+
 
 
 
@@ -415,14 +416,86 @@
   
 
 <script>
+  // Function to remove existing highlights
+  function clearHighlights() {
+      const highlightedElements = document.querySelectorAll(".highlight");
+      highlightedElements.forEach(el => {
+          const parent = el.parentNode;
+          parent.replaceChild(document.createTextNode(el.textContent), el);
+          parent.normalize(); // Merge adjacent text nodes
+      });
+  }
 
+  // Function to safely highlight matches
+  function highlightMatches(node, query) {
+      if (node.nodeType === 3) { // Text node
+          const matchIndex = node.nodeValue.toLowerCase().indexOf(query);
+          if (matchIndex !== -1) {
+              const parent = node.parentNode;
+              const matchedText = node.nodeValue.substr(matchIndex, query.length);
 
+              // Create span element for highlight
+              const span = document.createElement("span");
+              span.className = "highlight";
+              span.textContent = matchedText;
 
+              // Split the text node into before, match, and after
+              const before = document.createTextNode(node.nodeValue.substr(0, matchIndex));
+              const after = document.createTextNode(node.nodeValue.substr(matchIndex + query.length));
 
+              // Insert the new nodes in order
+              parent.replaceChild(after, node);
+              parent.insertBefore(span, after);
+              parent.insertBefore(before, span);
+          }
+      } else if (node.nodeType === 1 && node.childNodes && !["SCRIPT", "STYLE"].includes(node.tagName)) {
+          // Recursively handle child nodes
+          Array.from(node.childNodes).forEach(child => highlightMatches(child, query));
+      }
+  }
+
+  // Search button event listener
+  document.getElementById("search-btn").addEventListener("click", function () {
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      if (!query) {
+          alert("Please enter a word to search.");
+          return;
+      }
+
+      // Clear previous highlights
+      clearHighlights();
+
+      // Highlight matches
+      highlightMatches(document.body, query);
+
+      // Scroll to the first match
+      const firstMatch = document.querySelector(".highlight");
+      if (firstMatch) {
+          firstMatch.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+          alert("No matches found.");
+      }
+  });
+
+  // Event listener to clear highlights when input is cleared
+  document.getElementById("searchInput").addEventListener("input", function () {
+      if (this.value.trim() === "") {
+          clearHighlights();
+      }
+  });
+
+  // Add styles for highlights
+  const style = document.createElement("style");
+  style.textContent = `
+      .highlight {
+          background-color: yellow;
+          font-weight: bold;
+          color: black;
+      }
+  `;
+  document.head.appendChild(style);
 </script>
-
-
-
 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
