@@ -274,6 +274,11 @@
   .chat-input button {
     width: 25%; /* Make the button take full width */
   }
+  #chat-box {
+    width: 75%; /* Adjust the width to fit within the screen */
+    bottom: 10px; /* Slightly reduce the bottom margin */
+    right: 5%; /* Center the chat box horizontally */
+  }
 }
 
 
